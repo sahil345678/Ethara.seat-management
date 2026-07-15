@@ -1,13 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-// We will create these components in the next batches.
-// For now, they are empty functional components to establish the routing scaffold.
-const MainLayout = () => <div className="min-h-screen flex items-center justify-center text-gray-500">Layout (Pending Batch 3)</div>;
-const Dashboard = () => <div>Dashboard</div>;
-const Employees = () => <div>Employees</div>;
-const Projects = () => <div>Projects</div>;
-const Seats = () => <div>Seats</div>;
-const AiAssistant = () => <div>AI Assistant</div>;
+// Import real components built in Batches 3, 4, and 5
+import { MainLayout } from './layouts/MainLayout';
+import { Dashboard } from './pages/Dashboard';
+import { Employees } from './pages/Employees';
+import { EmployeeDetails } from './pages/EmployeeDetails';
+import { Projects } from './pages/Projects';
+import { Seats } from './pages/Seats';
+import { SeatAllocation } from './pages/SeatAllocation';
+import { AiAssistant } from './pages/AiAssistant';
 
 function App() {
   return (
@@ -17,10 +18,12 @@ function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="employees" element={<Employees />} />
+          <Route path="employees/:id" element={<EmployeeDetails />} />
           <Route path="projects" element={<Projects />} />
           <Route path="seats" element={<Seats />} />
+          <Route path="seats/allocate" element={<SeatAllocation />} />
           <Route path="ai" element={<AiAssistant />} />
-          <Route path="*" element={<div className="p-8 text-center text-red-500">404 - Page Not Found</div>} />
+          <Route path="*" element={<div className="p-12 text-center text-red-500 font-bold text-xl">404 - Page Not Found</div>} />
         </Route>
       </Routes>
     </BrowserRouter>
