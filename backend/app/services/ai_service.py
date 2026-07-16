@@ -86,7 +86,7 @@ class AiService:
                     Occupancy Rate: {summary.occupancy_rate:.1f}%
                     
                     FLOOR UTILIZATION:
-                    {chr(10).join([f"Floor {f.floor}: {f.occupied_seats}/{f.total_seats} occupied, {f.available} available" for f in floor_util])}
+                    {chr(10).join([f"Floor {f.floor}: {f.occupied}/{f.total_seats} occupied, {f.available} available" for f in floor_util])}
                     
                     TOP PROJECTS BY SEATS:
                     {chr(10).join([f"{p.project_name}: {p.allocated_seats} seats, {p.employee_count} employees" for p in proj_util[:15]])}
@@ -349,8 +349,8 @@ class AiService:
             
         lines = ["Seat Utilization by Floor:"]
         for f in data:
-            rate = (f.occupied_seats / f.total_seats * 100) if f.total_seats else 0
-            lines.append(f"- Floor {f.floor}: {f.occupied_seats}/{f.total_seats} occupied ({rate:.1f}%)")
+            rate = (f.occupied / f.total_seats * 100) if f.total_seats else 0
+            lines.append(f"- Floor {f.floor}: {f.occupied}/{f.total_seats} occupied ({rate:.1f}%)")
         return "\n".join(lines)
 
     def _handle_utilization_project(self) -> str:
