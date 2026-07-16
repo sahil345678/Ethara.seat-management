@@ -110,12 +110,12 @@ export const Projects = () => {
             <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50/50 px-4 py-3 sm:px-6">
               <div className="flex flex-1 justify-between sm:hidden">
                 <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary">Previous</button>
-                <button onClick={() => setPage(p => p + 1)} disabled={page >= data.meta.total_pages} className="btn-secondary ml-3">Next</button>
+                <button onClick={() => setPage(p => p + 1)} disabled={page >= data.total_pages} className="btn-secondary ml-3">Next</button>
               </div>
               <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-700">
-                    Showing <span className="font-bold">{(page - 1) * pageSize + 1}</span> to <span className="font-bold">{Math.min(page * pageSize, data.meta.total)}</span> of <span className="font-bold">{data.meta.total}</span> projects
+                    Showing <span className="font-bold">{(page - 1) * pageSize + 1}</span> to <span className="font-bold">{Math.min(page * pageSize, data.total)}</span> of <span className="font-bold">{data.total}</span> projects
                   </p>
                 </div>
                 <div>
@@ -123,7 +123,7 @@ export const Projects = () => {
                     <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 disabled:opacity-50 transition-colors">
                       <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                     </button>
-                    <button onClick={() => setPage(p => p + 1)} disabled={page >= data.meta.total_pages} className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 disabled:opacity-50 transition-colors">
+                    <button onClick={() => setPage(p => p + 1)} disabled={page >= data.total_pages} className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 disabled:opacity-50 transition-colors">
                       <ChevronRight className="h-5 w-5" aria-hidden="true" />
                     </button>
                   </nav>
@@ -191,9 +191,9 @@ const ProjectRow = ({ project, isExpanded, onToggle }: { project: Project, isExp
                       {emp.name}
                     </span>
                   ))}
-                  {teamData.meta.total > 50 && (
+                  {teamData.total > 50 && (
                     <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 border border-gray-200">
-                      +{teamData.meta.total - 50} more
+                      +{teamData.total - 50} more
                     </span>
                   )}
                 </div>
