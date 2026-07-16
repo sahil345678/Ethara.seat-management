@@ -178,59 +178,55 @@ class AiService:
         """Robust Regex-based keyword parser for handling complex queries without Gemini."""
         q = query.lower().strip()
 
-        # 1. Locate Employee
-        # Matches: "where is John", "find John", "seat for John", "where does John sit", "where is my seat"
+        # 1. Utilization
+        if "utilization" in q or "occupancy" in q or "capacity" in q:
+            if "project" in q or "team" in q:
+                return "UTILIZATION_PROJECT", {}
+            return "UTILIZATION_FLOOR", {}
+
+        # 2. Pending Allocations
+        if any(w in q for w in ["pending", "queue", "waiting"]):
+            return "PENDING_ALLOCATIONS", {}
+
+        # 3. Allocate / Book Seat
+        if any(w in q for w in ["allocate", "book", "reserve", "new seat"]) and "project" not in q:
+            return "ALLOCATE_SEAT", {}
+        if "assign" in q and "seat" in q:
+            return "ALLOCATE_SEAT", {}
+
+        # 4. Available Seats Zone
+        if m := re.search(r"(?:zone)\s+([a-z]+)", q):
+            if any(w in q for w in ["available", "free", "empty", "space", "open"]):
+                return "AVAILABLE_SEATS_ZONE", {"zone_name": m.group(1).strip().upper()}
+
+        # 5. Available Seats Floor
+        if m := re.search(r"(?:floor)\s*(\d+)", q):
+            return "AVAILABLE_SEATS_FLOOR", {"floor_number": int(m.group(1))}
+
+        # 6. Generic Fallbacks for Availability
+        if any(w in q for w in ["available", "free", "empty", "space", "open"]) and "seat" in q:
+            return "AVAILABLE_SEATS_FLOOR", {"floor_number": None}
+
+        # 7. Nearby Employees
+        if m := re.search(r"(?:near|next to|close to|around)\s+(.*)", q):
+            name = re.sub(r"[^\w\s]", "", m.group(1)).strip()
+            if name: return "NEARBY_EMPLOYEES", {"name": name}
+
+        # 8. Locate Employee
         if m := re.search(r"(?:where is|where does|find|seat for|locate)\s+(.*?)(?:\s+sit|\s+seated|\s+seat|$)", q):
             name = m.group(1).replace("my", "me").replace("is", "").strip()
-            if name: return "LOCATE_EMPLOYEE", {"name": name}
+            if not any(w in name for w in ["open", "space", "available", "free", "empty", "seat"]):
+                if name: return "LOCATE_EMPLOYEE", {"name": name}
         if "my seat" in q:
             return "LOCATE_EMPLOYEE", {"name": "me"}
 
-        # 2. Employee Project
-        # Matches: "project is John assigned", "what project is John on", "John's project"
+        # 9. Employee Project
         if m := re.search(r"(?:project|team).*?(?:for|is)\s+(.*?)(?:\s+assigned|\s+on|$)", q):
             return "EMPLOYEE_PROJECT", {"name": m.group(1).replace("assigned", "").strip()}
         if m := re.search(r"(.*?)(?:'s)?\s+(?:project|team)", q):
             name = m.group(1).replace("what", "").replace("which", "").strip()
             if name and name not in ["a", "the", "any"]:
                 return "EMPLOYEE_PROJECT", {"name": name}
-
-        # 3. Available Seats Zone
-        # Matches: "available seats in zone a", "zone a availability"
-        if m := re.search(r"(?:zone)\s+([a-z]+)", q):
-            if any(w in q for w in ["available", "free", "empty", "space", "open"]):
-                return "AVAILABLE_SEATS_ZONE", {"zone_name": m.group(1).strip().upper()}
-
-        # 4. Available Seats Floor
-        # Matches: "available seats on floor 2", "free seats floor 3", "3", "floor 3"
-        if m := re.search(r"(?:floor)\s*(\d+)", q):
-            return "AVAILABLE_SEATS_FLOOR", {"floor_number": int(m.group(1))}
-        
-        # 5. Nearby Employees
-        # Matches: "who sits near Bob", "next to Bob", "close to Bob"
-        if m := re.search(r"(?:near|next to|close to|around)\s+(.*)", q):
-            name = re.sub(r"[^\w\s]", "", m.group(1)).strip()
-            if name: return "NEARBY_EMPLOYEES", {"name": name}
-
-        # 6. Allocate / Book Seat
-        # Matches: "book seat A8", "allocate seat", "reserve a space"
-        if any(w in q for w in ["allocate", "book", "reserve", "assign", "new seat"]):
-            return "ALLOCATE_SEAT", {}
-
-        # 7. Pending Allocations
-        # Matches: "pending allocations", "waiting list", "queue"
-        if any(w in q for w in ["pending", "queue", "waiting"]):
-            return "PENDING_ALLOCATIONS", {}
-
-        # 8. Utilization
-        if "utilization" in q or "occupancy" in q or "capacity" in q:
-            if "project" in q or "team" in q:
-                return "UTILIZATION_PROJECT", {}
-            return "UTILIZATION_FLOOR", {}
-
-        # 9. Generic Fallbacks for Availability
-        if any(w in q for w in ["available", "free", "empty", "space", "open"]) and "seat" in q:
-            return "AVAILABLE_SEATS_FLOOR", {"floor_number": None}
             
         # 10. Bare Digits (Follow-up for Floor)
         if q.isdigit():
