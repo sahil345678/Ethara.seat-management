@@ -9,3 +9,4 @@ backend/__pycache__/
 *.pyc
 venv/
 env/
+frontend/node-v20.11.1-win-x64/
