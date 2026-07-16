@@ -65,7 +65,7 @@ export const Seats = () => {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">Facilities & Seats</h1>
-          <p className="mt-1 text-base text-gray-500">View physical office layout and seat occupancy.</p>
+          <p className="mt-1 text-base text-gray-500">View physical office layout and seat occupancy. Click on any occupied seat to release it.</p>
         </div>
         <div className="flex gap-3">
           <Link to="/seats/allocate" className="btn-primary flex items-center shadow-sm hover:shadow">
