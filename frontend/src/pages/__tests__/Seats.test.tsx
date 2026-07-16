@@ -29,7 +29,7 @@ describe('Seats Page', () => {
           { id: '1', floor: 1, zone: 'A', bay: 1, seat_number: '1A-01', status: 'AVAILABLE' },
           { id: '2', floor: 1, zone: 'B', bay: 1, seat_number: '1B-02', status: 'OCCUPIED' },
         ],
-        meta: { total: 2, page: 1, total_pages: 1 }
+        total: 2, page: 1, total_pages: 1
       },
       isLoading: false
     } as any);
@@ -43,7 +43,7 @@ describe('Seats Page', () => {
   it('resets page to 1 when a filter changes', () => {
     const refetchMock = vi.fn();
     vi.mocked(hooks.useSeats).mockReturnValue({
-      data: { data: [], meta: { total: 0, page: 1, total_pages: 1 } },
+      data: { data: [], total: 0, page: 1, total_pages: 1 },
       isLoading: false,
       refetch: refetchMock
     } as any);

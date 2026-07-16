@@ -14,7 +14,7 @@ export const Projects = () => {
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
   const pageSize = 10;
 
-  const { data, isLoading, isError, refetch, isFetching } = useProjects({
+  const { data, isLoading, isError, error, refetch, isFetching } = useProjects({
     page,
     page_size: pageSize,
     search: search || undefined,
@@ -74,7 +74,7 @@ export const Projects = () => {
         {isLoading ? (
           <LoadingSpinner fullHeight message="Loading projects..." />
         ) : isError ? (
-          <div className="p-12"><ErrorState onRetry={() => refetch()} /></div>
+          <div className="p-12"><ErrorState onRetry={() => refetch()} message={error?.message} /></div>
         ) : !data || data.data.length === 0 ? (
           <EmptyState 
             icon={<FolderKanban className="h-8 w-8 text-gray-400" />}
@@ -110,7 +110,7 @@ export const Projects = () => {
             <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50/50 px-4 py-3 sm:px-6">
               <div className="flex flex-1 justify-between sm:hidden">
                 <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary">Previous</button>
-                <button onClick={() => setPage(p => p + 1)} disabled={page >= data.meta.total_pages} className="btn-secondary ml-3">Next</button>
+                <button onClick={() => setPage(p => p + 1)} disabled={page >= data.total_pages} className="btn-secondary ml-3">Next</button>
               </div>
               <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                 <div>
@@ -123,7 +123,7 @@ export const Projects = () => {
                     <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 disabled:opacity-50 transition-colors">
                       <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                     </button>
-                    <button onClick={() => setPage(p => p + 1)} disabled={page >= data.meta.total_pages} className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 disabled:opacity-50 transition-colors">
+                    <button onClick={() => setPage(p => p + 1)} disabled={page >= data.total_pages} className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 disabled:opacity-50 transition-colors">
                       <span className="sr-only">Next</span>
                       <ChevronRight className="h-5 w-5" aria-hidden="true" />
                     </button>

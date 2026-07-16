@@ -12,12 +12,10 @@ export interface PaginationMeta {
 
 export interface PaginatedResponse<T> {
   data: T[];
-  meta: {
-    total: number;
-    page: number;
-    page_size: number;
-    total_pages: number;
-  };
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
 }
 
 export interface Project {
