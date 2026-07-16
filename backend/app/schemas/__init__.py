@@ -43,7 +43,10 @@ class PaginatedResponse(BaseModel, Generic[DataT]):
     """
 
     data: list[DataT] = Field(..., description="Page of result records.")
-    meta: PaginationMeta = Field(..., description="Pagination metadata.")
+    total: int = Field(..., description="Total number of matching records.")
+    page: int = Field(..., description="Current page number (1-indexed).")
+    page_size: int = Field(..., description="Number of records per page.")
+    total_pages: int = Field(..., description="Total number of pages.")
 
 
 # ── Entity schema re-exports ────────────────────────────────────────────────

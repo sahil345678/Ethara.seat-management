@@ -78,10 +78,13 @@ def get_seats(
     )
 
     total_pages = math.ceil(total / page_size) if total > 0 else 1
-    meta = PaginationMeta(
-        total=total, page=page, page_size=page_size, total_pages=total_pages
+    return PaginatedResponse(
+        data=list(items),
+        total=total,
+        page=page,
+        page_size=page_size,
+        total_pages=total_pages
     )
-    return PaginatedResponse(data=list(items), meta=meta)
 
 
 @router.get(
@@ -109,10 +112,13 @@ def get_available_seats(
     )
 
     total_pages = math.ceil(total / page_size) if total > 0 else 1
-    meta = PaginationMeta(
-        total=total, page=page, page_size=page_size, total_pages=total_pages
+    return PaginatedResponse(
+        data=list(items),
+        total=total,
+        page=page,
+        page_size=page_size,
+        total_pages=total_pages
     )
-    return PaginatedResponse(data=list(items), meta=meta)
 
 
 @router.post(
