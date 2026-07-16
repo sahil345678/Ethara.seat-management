@@ -132,13 +132,13 @@ export const Seats = () => {
         )}
 
         {/* Pagination */}
-        {data && data.total_pages > 1 && (
+        {data && data.meta.total_pages > 1 && (
           <div className="mt-8 flex items-center justify-center gap-4">
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary shadow-sm">
               <ChevronLeft className="w-4 h-4 mr-2" /> Previous
             </button>
-            <span className="text-sm font-bold text-gray-700">Page {page} of {data.total_pages}</span>
-            <button onClick={() => setPage(p => p + 1)} disabled={page >= data.total_pages} className="btn-secondary shadow-sm">
+            <span className="text-sm font-bold text-gray-700">Page {page} of {data.meta.total_pages}</span>
+            <button onClick={() => setPage(p => p + 1)} disabled={page >= data.meta.total_pages} className="btn-secondary shadow-sm">
               Next <ChevronRight className="w-4 h-4 ml-2" />
             </button>
           </div>
