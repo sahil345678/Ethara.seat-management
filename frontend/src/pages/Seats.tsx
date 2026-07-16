@@ -4,7 +4,8 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorState } from '../components/ErrorState';
 import { SeatGrid } from '../components/SeatGrid';
 import { Dialog } from '../components/Dialog';
-import { Search, ChevronLeft, ChevronRight, Filter, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, ChevronLeft, ChevronRight, Filter, LogOut, UserPlus } from 'lucide-react';
 import { SeatStatus, Seat } from '../types';
 import { useToast } from '../contexts/ToastContext';
 import { useNotification } from '../contexts/NotificationContext';
@@ -65,6 +66,12 @@ export const Seats = () => {
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">Facilities & Seats</h1>
           <p className="mt-1 text-base text-gray-500">View physical office layout and seat occupancy.</p>
+        </div>
+        <div className="flex gap-3">
+          <Link to="/seats/allocate" className="btn-primary flex items-center shadow-sm hover:shadow">
+            <UserPlus className="h-4 w-4 mr-2" />
+            Assign Seat
+          </Link>
         </div>
         
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
