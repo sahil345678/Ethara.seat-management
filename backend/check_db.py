@@ -1,41 +1,19 @@
-import psycopg2
+import os
 import sys
+import psycopg2
 
-def check_postgres(password="postgres"):
-    try:
-        conn = psycopg2.connect(
-            dbname="postgres",
-            user="postgres",
-            password=password,
-            host="localhost",
-            port="5432"
-        )
-        conn.autocommit = True
-        cursor = conn.cursor()
-        
-        # Check if database exists
-        cursor.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = 'ethara_db'")
-        exists = cursor.fetchone()
-        
-        if not exists:
-            print("Creating ethara_db...")
-            cursor.execute("CREATE DATABASE ethara_db")
-            print("Created.")
-        else:
-            print("ethara_db already exists.")
-            
-        cursor.close()
-        conn.close()
-        return True
-    except Exception as e:
-        print(f"Failed with password {password}: {e}")
-        return False
 
-if not check_postgres("postgres"):
-    if not check_postgres("root"):
-        if not check_postgres(""):
-            print("Could not connect to PostgreSQL.")
-            sys.exit(1)
+database_url = os.getenv("DATABASE_URL")
 
-print("Success!")
-sys.exit(0)
+if not database_url:
+    print("DATABASE_URL not found")
+    sys.exit(1)
+
+try:
+    conn = psycopg2.connect(database_url)
+    conn.close()
+    print("Database connection successful!")
+    sys.exit(0)
+except Exception as e:
+    print(f"Database connection failed: {e}")
+    sys.exit(1)
