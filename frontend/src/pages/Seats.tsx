@@ -85,9 +85,9 @@ export const Seats = () => {
           <SeatGrid seats={data?.data || []} isLoading={isLoading} />
         )}
 
-        <div className="card p-6">
+        {/* Pagination */}
         {data && data.total_pages > 1 && (
-          <div className="flex items-center justify-between">
+          <div className="mt-8 flex items-center justify-center gap-4">
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary shadow-sm">
               <ChevronLeft className="w-4 h-4 mr-2" /> Previous
             </button>
