@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSeats } from '../hooks/useSeats';
+import { useSeats, useReleaseSeat } from '../hooks/useSeats';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorState } from '../components/ErrorState';
 import { SeatGrid } from '../components/SeatGrid';

@@ -40,18 +40,18 @@ class DashboardService:
         """Calculate global KPIs for the dashboard overview."""
         # Using limit=1 to run fast count queries over the subqueries
         _, total_employees = self.employee_repo.list_employees(limit=1)
-        _, total_seats = self.seat_repo.list_seats(limit=1)
+        _, total_seats = self.seat_repo.list_seats(limit=1, include_occupants=False)
         _, occupied = self.seat_repo.list_seats(
-            status=SeatStatus.OCCUPIED, limit=1
+            status=SeatStatus.OCCUPIED, limit=1, include_occupants=False
         )
         _, available = self.seat_repo.list_seats(
-            status=SeatStatus.AVAILABLE, limit=1
+            status=SeatStatus.AVAILABLE, limit=1, include_occupants=False
         )
         _, reserved = self.seat_repo.list_seats(
-            status=SeatStatus.RESERVED, limit=1
+            status=SeatStatus.RESERVED, limit=1, include_occupants=False
         )
         _, maintenance = self.seat_repo.list_seats(
-            status=SeatStatus.MAINTENANCE, limit=1
+            status=SeatStatus.MAINTENANCE, limit=1, include_occupants=False
         )
 
         _, active_emps = self.employee_repo.list_employees(
@@ -107,7 +107,7 @@ class DashboardService:
     def get_floor_utilization(self) -> list[FloorUtilization]:
         """Calculate seat distribution and statuses broken down by floor."""
         # Load all seats into memory for efficient single-pass aggregation
-        seats, _ = self.seat_repo.list_seats(limit=20000)
+        seats, _ = self.seat_repo.list_seats(limit=20000, include_occupants=False)
 
         # Structure: floors_data[floor] = { "total": x, "available": y, ... }
         floors_data = defaultdict(

@@ -43,12 +43,16 @@ class SeatRepository:
         limit: int = 100,
         sort_by: str = "label",
         sort_desc: bool = False,
+        include_occupants: bool = True,
     ) -> tuple[Sequence[Seat], int]:
         """List seats with filtering, search, sorting, and pagination."""
-        stmt = select(Seat).options(
-            selectinload(Seat.seat_allocations).selectinload("employee"),
-            selectinload(Seat.seat_allocations).selectinload("project")
-        )
+        stmt = select(Seat)
+        
+        if include_occupants:
+            stmt = stmt.options(
+                selectinload(Seat.seat_allocations).selectinload("employee"),
+                selectinload(Seat.seat_allocations).selectinload("project")
+            )
 
         if floor is not None:
             stmt = stmt.where(Seat.floor == floor)
