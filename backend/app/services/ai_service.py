@@ -116,33 +116,66 @@ class AiService:
             return None, {}
 
     def _parse_intent_fallback(self, query: str) -> tuple[str | None, dict[str, Any]]:
-        """Fallback Regex-based keyword parser."""
-        q = query.lower()
+        """Robust Regex-based keyword parser for handling complex queries without Gemini."""
+        q = query.lower().strip()
 
-        # Regex patterns
-        if m := re.search(r"where is (.*?) seated", q):
-            return "LOCATE_EMPLOYEE", {"name": m.group(1).strip()}
-        if m := re.search(r"where is my seat", q):
+        # 1. Locate Employee
+        # Matches: "where is John", "find John", "seat for John", "where does John sit", "where is my seat"
+        if m := re.search(r"(?:where is|where does|find|seat for|locate)\s+(.*?)(?:\s+sit|\s+seated|\s+seat|$)", q):
+            name = m.group(1).replace("my", "me").replace("is", "").strip()
+            if name: return "LOCATE_EMPLOYEE", {"name": name}
+        if "my seat" in q:
             return "LOCATE_EMPLOYEE", {"name": "me"}
-        if m := re.search(r"project is (.*?) assigned", q):
-            return "EMPLOYEE_PROJECT", {"name": m.group(1).strip()}
-        if m := re.search(r"available.*?floor (\d+)", q):
+
+        # 2. Employee Project
+        # Matches: "project is John assigned", "what project is John on", "John's project"
+        if m := re.search(r"(?:project|team).*?(?:for|is)\s+(.*?)(?:\s+assigned|\s+on|$)", q):
+            return "EMPLOYEE_PROJECT", {"name": m.group(1).replace("assigned", "").strip()}
+        if m := re.search(r"(.*?)(?:'s)?\s+(?:project|team)", q):
+            name = m.group(1).replace("what", "").replace("which", "").strip()
+            if name and name not in ["a", "the", "any"]:
+                return "EMPLOYEE_PROJECT", {"name": name}
+
+        # 3. Available Seats Zone
+        # Matches: "available seats in zone a", "zone a availability"
+        if m := re.search(r"(?:zone)\s+([a-z]+)", q):
+            if any(w in q for w in ["available", "free", "empty", "space", "open"]):
+                return "AVAILABLE_SEATS_ZONE", {"zone_name": m.group(1).strip().upper()}
+
+        # 4. Available Seats Floor
+        # Matches: "available seats on floor 2", "free seats floor 3", "3", "floor 3"
+        if m := re.search(r"(?:floor)\s*(\d+)", q):
             return "AVAILABLE_SEATS_FLOOR", {"floor_number": int(m.group(1))}
-        if m := re.search(r"available.*?zone ([a-z]+)", q):
-            return "AVAILABLE_SEATS_ZONE", {"zone_name": m.group(1).strip().upper()}
-        if m := re.search(r"who sits near (.*)", q):
-            name = re.sub(r"[^\w\s]", "", m.group(1)).strip()
-            return "NEARBY_EMPLOYEES", {"name": name}
         
-        # Simple Keyword matching
-        if "utilization" in q and "floor" in q:
-            return "UTILIZATION_FLOOR", {}
-        if "utilization" in q and "project" in q:
-            return "UTILIZATION_PROJECT", {}
-        if "allocate" in q and "seat" in q:
+        # 5. Nearby Employees
+        # Matches: "who sits near Bob", "next to Bob", "close to Bob"
+        if m := re.search(r"(?:near|next to|close to|around)\s+(.*)", q):
+            name = re.sub(r"[^\w\s]", "", m.group(1)).strip()
+            if name: return "NEARBY_EMPLOYEES", {"name": name}
+
+        # 6. Allocate / Book Seat
+        # Matches: "book seat A8", "allocate seat", "reserve a space"
+        if any(w in q for w in ["allocate", "book", "reserve", "assign", "new seat"]):
             return "ALLOCATE_SEAT", {}
-        if "pending" in q:
+
+        # 7. Pending Allocations
+        # Matches: "pending allocations", "waiting list", "queue"
+        if any(w in q for w in ["pending", "queue", "waiting"]):
             return "PENDING_ALLOCATIONS", {}
+
+        # 8. Utilization
+        if "utilization" in q or "occupancy" in q or "capacity" in q:
+            if "project" in q or "team" in q:
+                return "UTILIZATION_PROJECT", {}
+            return "UTILIZATION_FLOOR", {}
+
+        # 9. Generic Fallbacks for Availability
+        if any(w in q for w in ["available", "free", "empty", "space", "open"]) and "seat" in q:
+            return "AVAILABLE_SEATS_FLOOR", {"floor_number": None}
+            
+        # 10. Bare Digits (Follow-up for Floor)
+        if q.isdigit():
+            return "AVAILABLE_SEATS_FLOOR", {"floor_number": int(q)}
 
         return None, {}
 
@@ -277,4 +310,4 @@ class AiService:
 
     def _handle_pending_allocations(self) -> str:
         summary = self.dash_svc.get_summary()
-        return f"There are currently {summary.pending_allocations} employees pending seat allocation in the system."
+        return f"There are currently {summary.pending_allocation} employees pending seat allocation in the system."

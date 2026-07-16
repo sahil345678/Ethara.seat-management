@@ -59,12 +59,7 @@ class Employee(Base, TimestampMixin):
     __table_args__ = (
         sa.Index("idx_employee_project", "project_id"),
         sa.Index("idx_employee_status", "status"),
-        sa.Index(
-            "idx_employee_name_trgm",
-            "name",
-            postgresql_using="gin",
-            postgresql_ops={"name": "gin_trgm_ops"},
-        ),
+        sa.Index("idx_employee_name", "name"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(

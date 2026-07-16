@@ -25,8 +25,8 @@ export const Dashboard = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Overview</h1>
-        <p className="mt-1 text-base text-gray-500">Real-time metrics for facility occupancy and project mapping.</p>
+        <h1 className="text-3xl font-display font-bold text-surface-900 tracking-tight">Overview</h1>
+        <p className="mt-2 text-base text-surface-500">Real-time metrics for facility occupancy and project mapping.</p>
       </div>
       
       {summary && <DashboardCards summary={summary} />}

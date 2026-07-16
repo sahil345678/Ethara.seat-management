@@ -12,13 +12,13 @@ interface SeatGridProps {
 export const SeatGrid = ({ seats, onSeatClick, selectedSeatId, isLoading }: SeatGridProps) => {
   const getStatusClasses = (status: SeatStatus, isInteractive: boolean) => {
     switch (status) {
-      case 'AVAILABLE': 
+      case 'Available': 
         return clsx('bg-teal-50 border-teal-200 text-teal-700', isInteractive && 'hover:bg-teal-100 hover:border-teal-400');
-      case 'OCCUPIED': 
+      case 'Occupied': 
         return 'bg-blue-50 border-blue-200 text-blue-700 opacity-70 cursor-not-allowed';
-      case 'RESERVED': 
+      case 'Reserved': 
         return 'bg-purple-50 border-purple-200 text-purple-700 opacity-70 cursor-not-allowed';
-      case 'MAINTENANCE': 
+      case 'Maintenance': 
         return 'bg-gray-100 border-gray-300 text-gray-500 opacity-60 cursor-not-allowed';
       default: 
         return 'bg-gray-50 border-gray-200 text-gray-400';
@@ -47,7 +47,7 @@ export const SeatGrid = ({ seats, onSeatClick, selectedSeatId, isLoading }: Seat
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
       {seats.map((seat) => {
-        const isInteractive = seat.status === 'AVAILABLE' && !!onSeatClick;
+        const isInteractive = seat.status === 'Available' && !!onSeatClick;
         const isSelected = selectedSeatId === seat.id;
         
         return (

@@ -20,10 +20,3 @@ class Base(DeclarativeBase):
     pass
 
 
-# ── Import all models so Alembic can detect them ────────────────────────────
-# These imports MUST come after Base is defined to avoid circular imports.
-
-from app.models.employee import Employee  # noqa: E402, F401
-from app.models.project import Project  # noqa: E402, F401
-from app.models.seat import Seat  # noqa: E402, F401
-from app.models.seat_allocation import SeatAllocation  # noqa: E402, F401

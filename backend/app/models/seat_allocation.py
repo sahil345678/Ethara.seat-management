@@ -59,16 +59,12 @@ class SeatAllocation(Base):
     __table_args__ = (
         # ── Partial unique indexes (business rule enforcement) ───────────
         sa.Index(
-            "idx_unique_active_employee",
+            "idx_alloc_active_employee",
             "employee_id",
-            unique=True,
-            postgresql_where=sa.text("allocation_status = 'Active'"),
         ),
         sa.Index(
-            "idx_unique_active_seat",
+            "idx_alloc_active_seat",
             "seat_id",
-            unique=True,
-            postgresql_where=sa.text("allocation_status = 'Active'"),
         ),
         # ── General-purpose query indexes ────────────────────────────────
         sa.Index("idx_alloc_employee", "employee_id"),

@@ -39,7 +39,7 @@ export const EmployeeDetails = () => {
               <Briefcase className="w-5 h-5 opacity-80" /> {employee.role}
             </p>
             <div className="mt-4 inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-sm font-bold backdrop-blur-sm">
-              <span className={clsx("w-2 h-2 rounded-full mr-2", employee.status === 'ACTIVE' ? 'bg-green-400' : 'bg-gray-300')}></span>
+              <span className={clsx("w-2 h-2 rounded-full mr-2", employee.status === 'Active' ? 'bg-green-400' : 'bg-gray-300')}></span>
               {employee.status}
             </div>
           </div>

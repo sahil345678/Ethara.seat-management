@@ -1,7 +1,7 @@
-export type EmployeeStatus = 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE' | 'TERMINATED';
-export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED';
-export type SeatStatus = 'AVAILABLE' | 'OCCUPIED' | 'RESERVED' | 'MAINTENANCE';
-export type AllocationStatus = 'ACTIVE' | 'RELEASED' | 'PENDING';
+export type EmployeeStatus = 'Active' | 'Inactive';
+export type ProjectStatus = 'Active' | 'Completed';
+export type SeatStatus = 'Available' | 'Occupied' | 'Reserved' | 'Maintenance';
+export type AllocationStatus = 'Active' | 'Released';
 
 export interface PaginationMeta {
   total: number;
@@ -22,7 +22,6 @@ export interface Project {
   manager_name?: string;
   status: ProjectStatus;
   created_at: string;
-  updated_at: string;
 }
 
 export interface Employee {
@@ -48,7 +47,6 @@ export interface Seat {
   seat_number: string;
   status: SeatStatus;
   created_at: string;
-  updated_at: string;
 }
 
 export interface SeatAllocation {
@@ -62,8 +60,6 @@ export interface SeatAllocation {
   employee?: Employee;
   seat?: Seat;
   project?: Project;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface DashboardSummary {
@@ -72,7 +68,8 @@ export interface DashboardSummary {
   available_seats: number;
   occupied_seats: number;
   reserved_seats: number;
-  pending_allocations: number;
+  maintenance_seats: number;
+  pending_allocation: number;
   occupancy_rate: number;
 }
 
@@ -80,13 +77,16 @@ export interface ProjectUtilization {
   project_id?: string;
   project_name: string;
   allocated_seats: number;
+  employee_count: number;
 }
 
 export interface FloorUtilization {
   floor: number;
   total_seats: number;
-  occupied_seats: number;
-  available_seats: number;
+  occupied: number;
+  available: number;
+  reserved: number;
+  maintenance: number;
 }
 
 export interface AiQueryRequest {
@@ -97,3 +97,4 @@ export interface AiQueryResponse {
   answer: string;
   data?: any;
 }
+

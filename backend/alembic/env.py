@@ -26,6 +26,11 @@ config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 # MetaData object for 'autogenerate' support — Alembic inspects this
 # to determine what tables/columns exist in the ORM vs. the database.
+from app.models.employee import Employee
+from app.models.project import Project
+from app.models.seat import Seat
+from app.models.seat_allocation import SeatAllocation
+
 target_metadata = Base.metadata
 
 

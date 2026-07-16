@@ -18,7 +18,7 @@ export const SeatAllocation = () => {
     page: 1,
     page_size: 5,
     search: employeeSearch || undefined,
-    status: 'ACTIVE',
+    status: 'Active',
   });
 
   // Fetch only AVAILABLE seats

@@ -21,7 +21,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       {/* Mobile Backdrop overlay for responsive design */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-20 bg-gray-900/50 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 z-20 bg-surface-900/40 backdrop-blur-sm lg:hidden transition-opacity"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -30,20 +30,25 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       {/* Sidebar Container */}
       <aside
         className={clsx(
-          "fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out lg:static lg:flex lg:translate-x-0 shadow-lg lg:shadow-none",
+          "fixed inset-y-0 left-0 z-30 flex w-72 flex-col glass-panel border-r-0 transition-transform duration-300 ease-in-out lg:static lg:flex lg:translate-x-0 shadow-premium lg:shadow-none lg:border-r lg:border-surface-200/60",
           isOpen ? "translate-x-0 flex" : "-translate-x-full"
         )}
       >
         {/* Brand Header */}
-        <div className="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-200 px-6">
-          <span className="text-2xl font-black text-blue-600 tracking-tighter">Ethara.</span>
-          <button onClick={onClose} className="lg:hidden p-1 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors">
+        <div className="flex h-20 flex-shrink-0 items-center justify-between border-b border-surface-200/60 px-6 mt-2">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-DEFAULT flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-lg">E</span>
+            </div>
+            <span className="text-2xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-surface-900 to-surface-600 tracking-tight">Ethara.</span>
+          </div>
+          <button onClick={onClose} className="lg:hidden p-1.5 rounded-lg text-surface-500 hover:text-surface-900 hover:bg-surface-100 transition-colors">
             <X size={20} aria-label="Close sidebar" />
           </button>
         </div>
         
         {/* Navigation Links */}
-        <nav className="flex-1 space-y-1.5 overflow-y-auto p-4">
+        <nav className="flex-1 space-y-2 overflow-y-auto p-4 mt-4">
           {navItems.map((item) => (
             <NavLink
               key={item.name}
@@ -53,15 +58,15 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               }}
               className={({ isActive }) =>
                 clsx(
-                  "group flex items-center rounded-lg px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+                  "group flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300",
                   isActive
-                    ? "bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-600/10"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    ? "bg-brand-50 text-brand-700 shadow-sm ring-1 ring-brand-500/20 shadow-brand-100/50"
+                    : "text-surface-600 hover:bg-surface-100/80 hover:text-surface-900"
                 )
               }
             >
               <item.icon
-                className={clsx("mr-3 h-5 w-5 flex-shrink-0 transition-colors", "text-current opacity-70 group-hover:opacity-100")}
+                className={clsx("mr-3 h-5 w-5 flex-shrink-0 transition-all duration-300", "group-hover:scale-110", "text-current opacity-70 group-hover:opacity-100")}
                 aria-hidden="true"
               />
               {item.name}
@@ -70,9 +75,9 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         </nav>
         
         {/* Footer Area */}
-        <div className="border-t border-gray-200 p-4">
-          <button className="group flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-gray-600 transition-all duration-200 hover:bg-red-50 hover:text-red-700">
-            <LogOut className="mr-3 h-5 w-5 flex-shrink-0 opacity-70 group-hover:opacity-100" aria-hidden="true" />
+        <div className="border-t border-surface-200/60 p-4 mb-2">
+          <button className="group flex w-full items-center rounded-xl px-4 py-3 text-sm font-medium text-surface-600 transition-all duration-300 hover:bg-red-50 hover:text-red-600">
+            <LogOut className="mr-3 h-5 w-5 flex-shrink-0 opacity-70 group-hover:opacity-100 transition-transform duration-300 group-hover:-translate-x-1" aria-hidden="true" />
             Logout
           </button>
         </div>

@@ -159,8 +159,8 @@ const ProjectRow = ({ project, isExpanded, onToggle }: { project: Project, isExp
         <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-700">{project.manager_name || 'Unassigned'}</td>
         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
           <span className={clsx("inline-flex items-center rounded-md px-2 py-1 text-xs font-bold uppercase tracking-wider ring-1 ring-inset", 
-            project.status === 'ACTIVE' ? "bg-green-50 text-green-700 ring-green-600/20" : 
-            project.status === 'COMPLETED' ? "bg-blue-50 text-blue-700 ring-blue-600/20" :
+            project.status === 'Active' ? "bg-green-50 text-green-700 ring-green-600/20" : 
+            project.status === 'Completed' ? "bg-blue-50 text-blue-700 ring-blue-600/20" :
             "bg-gray-50 text-gray-600 ring-gray-500/10"
           )}>
             {project.status}
