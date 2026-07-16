@@ -5,7 +5,7 @@ import { ErrorState } from '../components/ErrorState';
 import { SeatGrid } from '../components/SeatGrid';
 import { Dialog } from '../components/Dialog';
 import { Link } from 'react-router-dom';
-import { Search, ChevronLeft, ChevronRight, Filter, LogOut, UserPlus } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Filter, LogOut, UserPlus, Lightbulb } from 'lucide-react';
 import { SeatStatus, Seat } from '../types';
 import { useToast } from '../contexts/ToastContext';
 import { useNotification } from '../contexts/NotificationContext';
@@ -65,7 +65,13 @@ export const Seats = () => {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">Facilities & Seats</h1>
-          <p className="mt-1 text-base text-gray-500">View physical office layout and seat occupancy. Click on any occupied seat to release it.</p>
+          <p className="mt-1 text-base text-gray-500 flex items-center">
+            View physical office layout and seat occupancy. 
+            <span className="inline-flex items-center ml-2 text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full text-xs font-medium">
+              <Lightbulb className="w-3 h-3 mr-1" />
+              Click on any occupied seat to release it
+            </span>
+          </p>
         </div>
         <div className="flex gap-3">
           <Link to="/seats/allocate" className="btn-primary flex items-center shadow-sm hover:shadow">
