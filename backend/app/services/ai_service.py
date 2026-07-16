@@ -64,16 +64,75 @@ class AiService:
             logger.info("Falling back to regex keyword parser.")
             intent, params = self._parse_intent_fallback(query)
 
-        # 3. Handle Unknown
+        # 3. Handle Unknown / General Questions
         if not intent:
+            if self.model:
+                try:
+                    logger.info("No specific intent matched. Using Gemini with live context for general Q&A.")
+                    # Fetch live context
+                    summary = self.dash_svc.get_summary()
+                    floor_util = self.dash_svc.get_floor_utilization()
+                    proj_util = self.dash_svc.get_project_utilization()
+                    
+                    context = f"""
+                    LIVE OFFICE METRICS:
+                    Total Employees: {summary.total_employees}
+                    Total Seats: {summary.total_seats}
+                    Available Seats: {summary.available_seats}
+                    Occupied Seats: {summary.occupied_seats}
+                    Reserved Seats: {summary.reserved_seats}
+                    Maintenance Seats: {summary.maintenance_seats}
+                    Pending Allocations: {summary.pending_allocation}
+                    Occupancy Rate: {summary.occupancy_rate:.1f}%
+                    
+                    FLOOR UTILIZATION:
+                    {chr(10).join([f"Floor {f.floor}: {f.occupied_seats}/{f.total_seats} occupied, {f.available} available" for f in floor_util])}
+                    
+                    TOP PROJECTS BY SEATS:
+                    {chr(10).join([f"{p.project_name}: {p.allocated_seats} seats, {p.employee_count} employees" for p in proj_util[:15]])}
+                    """
+                    
+                    prompt = f"""
+                    You are Ethara's intelligent office seat management AI assistant.
+                    The user asked: "{query}"
+                    
+                    Answer their question in a friendly, concise, and professional tone using ONLY the following live system context.
+                    If the answer cannot be determined from this context, politely explain that you don't have that specific data, but offer a related metric from the context.
+                    
+                    Context:
+                    {context}
+                    """
+                    response = self.model.generate_content(prompt)
+                    return response.text.strip()
+                except Exception as e:
+                    logger.error(f"Gemini general context fallback failed: {e}")
+
             return (
                 "I couldn't understand your request. Try asking something like: "
-                "'Where is employee John Doe seated?' or 'Show available seats on Floor 2'."
+                "'What is the total occupancy rate?', 'Which project uses the most seats?', or 'Where is John seated?'"
             )
 
-        # 4. Route and Execute
+        # 4. Route and Execute Specific Intent
         logger.info(f"Executing intent '{intent}' with params {params}")
-        return self._execute_intent(intent, params)
+        result = self._execute_intent(intent, params)
+        
+        # 5. Make the specific intent response sound more natural using Gemini if available
+        if self.model:
+            try:
+                prompt = f"""
+                You are Ethara's friendly AI office assistant. 
+                The user asked: "{query}"
+                I have retrieved the raw data answer: "{result}"
+                
+                Rewrite this raw answer into a friendly, natural, and concise response. 
+                Do NOT add any information that is not present in the raw answer.
+                """
+                response = self.model.generate_content(prompt)
+                return response.text.strip()
+            except Exception:
+                return result
+                
+        return result
 
     def _parse_intent_gemini(self, query: str) -> tuple[str | None, dict[str, Any]]:
         """Use Gemini to extract structured intent."""
