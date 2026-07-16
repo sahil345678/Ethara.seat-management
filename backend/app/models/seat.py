@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.enums import SeatStatus
+from app.core.enums import SeatStatus, AllocationStatus
 from app.db.base import Base
 from app.models.base import CreatedAtMixin
 
@@ -78,6 +78,22 @@ class Seat(Base, CreatedAtMixin):
     def label(self) -> str:
         """Human-readable seat identifier (e.g., ``F2-ZB-B4-S23``)."""
         return f"F{self.floor}-Z{self.zone}-B{self.bay}-{self.seat_number}"
+
+    @property
+    def occupant_name(self) -> str | None:
+        """Name of the currently occupying employee, if any."""
+        for alloc in self.seat_allocations:
+            if alloc.allocation_status == AllocationStatus.ACTIVE and alloc.employee:
+                return alloc.employee.name
+        return None
+
+    @property
+    def project_name(self) -> str | None:
+        """Name of the project for the current allocation, if any."""
+        for alloc in self.seat_allocations:
+            if alloc.allocation_status == AllocationStatus.ACTIVE and alloc.project:
+                return alloc.project.name
+        return None
 
     def __repr__(self) -> str:
         return (

@@ -98,3 +98,5 @@ class SeatResponse(BaseModel):
     status: SeatStatus
     label: str
     created_at: datetime
+    occupant_name: str | None = None
+    project_name: str | None = None

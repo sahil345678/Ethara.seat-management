@@ -2,16 +2,21 @@ import { useState } from 'react';
 import { useAvailableSeats, useAllocateSeat } from '../hooks/useSeats';
 import { useEmployees } from '../hooks/useEmployees';
 import { SeatGrid } from '../components/SeatGrid';
-import { Search, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Dialog } from '../components/Dialog';
+import { Search, CheckCircle2, AlertCircle, CalendarCheck } from 'lucide-react';
 import { Employee, Seat } from '../types';
+import { useToast } from '../contexts/ToastContext';
+import { useNotification } from '../contexts/NotificationContext';
 import clsx from 'clsx';
 
 export const SeatAllocation = () => {
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
-  const [successMsg, setSuccessMsg] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  
+  const { addToast } = useToast();
+  const { addNotification } = useNotification();
 
   // Fetch pending employees using the powerful search endpoint
   const { data: employeesData, isLoading: isEmpLoading } = useEmployees({
@@ -32,20 +37,25 @@ export const SeatAllocation = () => {
 
   const handleAllocate = async () => {
     if (!selectedEmployee) return;
-    setSuccessMsg('');
-    setErrorMsg('');
     
     try {
       await allocateMutation.mutateAsync({
         employee_id: selectedEmployee.id,
         seat_id: selectedSeat ? selectedSeat.id : undefined, // undefined triggers the Auto-Allocation Engine from Phase 7!
       });
-      setSuccessMsg(`Successfully allocated seat to ${selectedEmployee.name}.`);
+      addToast(`Successfully allocated seat to ${selectedEmployee.name}.`, 'success');
+      addNotification(
+        'Seat Allocated', 
+        `${selectedEmployee.name} has been assigned to ${selectedSeat ? `Seat ${selectedSeat.seat_number}` : 'a smart proximity seat'}.`, 
+        'success'
+      );
       setSelectedEmployee(null);
       setSelectedSeat(null);
       setEmployeeSearch('');
+      setIsConfirmModalOpen(false);
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to allocate seat.");
+      addToast(err.message || "Failed to allocate seat.", 'error');
+      setIsConfirmModalOpen(false);
     }
   };
 
@@ -56,12 +66,7 @@ export const SeatAllocation = () => {
         <p className="mt-1 text-base text-gray-500">Manually select a seat or let the proximity algorithm auto-allocate.</p>
       </div>
 
-      {(successMsg || errorMsg) && (
-        <div className={clsx("p-4 rounded-xl flex items-center border-2", successMsg ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800")}>
-          {successMsg ? <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0" /> : <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />}
-          <p className="font-semibold text-sm">{successMsg || errorMsg}</p>
-        </div>
-      )}
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Step 1: Employee Selection */}
@@ -131,13 +136,80 @@ export const SeatAllocation = () => {
           </p>
         </div>
         <button
-          onClick={handleAllocate}
-          disabled={!selectedEmployee || allocateMutation.isPending}
+          onClick={() => setIsConfirmModalOpen(true)}
+          disabled={!selectedEmployee}
           className="btn-primary bg-blue-500 hover:bg-blue-400 text-white px-8 py-3 text-base font-bold shadow-lg disabled:opacity-50 transition-all focus:ring-white"
         >
-          {allocateMutation.isPending ? "Allocating..." : "Confirm Allocation"}
+          Review Assignment
         </button>
       </div>
+
+      <Dialog
+        isOpen={isConfirmModalOpen}
+        onClose={() => !allocateMutation.isPending && setIsConfirmModalOpen(false)}
+        title="Confirm Allocation"
+        footer={
+          <>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => setIsConfirmModalOpen(false)}
+              disabled={allocateMutation.isPending}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn-primary bg-blue-600 hover:bg-blue-700"
+              onClick={handleAllocate}
+              disabled={allocateMutation.isPending}
+            >
+              {allocateMutation.isPending ? "Allocating..." : "Confirm Assignment"}
+            </button>
+          </>
+        }
+      >
+        <div className="flex flex-col items-center justify-center text-center p-4">
+          <div className="h-16 w-16 rounded-full bg-blue-50 flex items-center justify-center mb-4">
+            <CalendarCheck className="h-8 w-8 text-blue-500" />
+          </div>
+          <p className="text-gray-900 font-medium mb-1">
+            Please confirm the seat assignment for <strong className="text-brand-600">{selectedEmployee?.name}</strong>.
+          </p>
+          
+          <div className="w-full mt-6 bg-gray-50 rounded-xl p-4 border border-gray-100 text-left">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Employee</p>
+                <p className="font-bold text-gray-900">{selectedEmployee?.name}</p>
+                <p className="text-xs text-gray-500 font-mono mt-0.5">{selectedEmployee?.employee_code}</p>
+              </div>
+              <div>
+                <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Department</p>
+                <p className="font-bold text-gray-900">{selectedEmployee?.department || 'N/A'}</p>
+              </div>
+              <div className="col-span-2 pt-3 border-t border-gray-200 mt-1">
+                <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">Target Seat</p>
+                {selectedSeat ? (
+                  <p className="font-bold text-gray-900 text-lg">
+                    {selectedSeat.seat_number} 
+                    <span className="text-sm font-medium text-gray-500 ml-2">
+                      (Floor {selectedSeat.floor}, Zone {selectedSeat.zone}, Bay {selectedSeat.bay})
+                    </span>
+                  </p>
+                ) : (
+                  <p className="font-bold text-blue-600 text-lg flex items-center">
+                    Auto-Assigned Proximity Seat
+                    <span className="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                      Smart Algorithm
+                    </span>
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 };

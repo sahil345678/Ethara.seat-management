@@ -3,8 +3,11 @@ import { useSeats } from '../hooks/useSeats';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorState } from '../components/ErrorState';
 import { SeatGrid } from '../components/SeatGrid';
-import { Search, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
-import { SeatStatus } from '../types';
+import { Dialog } from '../components/Dialog';
+import { Search, ChevronLeft, ChevronRight, Filter, LogOut } from 'lucide-react';
+import { SeatStatus, Seat } from '../types';
+import { useToast } from '../contexts/ToastContext';
+import { useNotification } from '../contexts/NotificationContext';
 
 export const Seats = () => {
   const [page, setPage] = useState(1);
@@ -13,6 +16,13 @@ export const Seats = () => {
   const [zone, setZone] = useState<string | undefined>();
   const [status, setStatus] = useState<SeatStatus | undefined>();
   const pageSize = 60; // Show a large grid
+  
+  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
+  const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
+  
+  const { addToast } = useToast();
+  const { addNotification } = useNotification();
+  const releaseMutation = useReleaseSeat();
 
   const { data, isLoading, isError, refetch } = useSeats({
     page,
@@ -27,6 +37,26 @@ export const Seats = () => {
     e.preventDefault();
     setPage(1);
     refetch();
+  };
+
+  const handleSeatClick = (seat: Seat) => {
+    if (seat.status === 'Occupied') {
+      setSelectedSeat(seat);
+      setIsReleaseModalOpen(true);
+    }
+  };
+
+  const handleRelease = async () => {
+    if (!selectedSeat) return;
+    try {
+      await releaseMutation.mutateAsync({ seat_id: selectedSeat.id });
+      addToast(`Seat ${selectedSeat.seat_number} has been released.`, 'success');
+      addNotification('Seat Released', `Seat ${selectedSeat.seat_number} is now available.`, 'info');
+      setIsReleaseModalOpen(false);
+      setSelectedSeat(null);
+    } catch (err: any) {
+      addToast(err.message || 'Failed to release seat.', 'error');
+    }
   };
 
   return (
@@ -68,6 +98,18 @@ export const Seats = () => {
             <option value="">All Zones</option>
             {['A','B','C','D','E','F','G','H','I','J'].map(z => <option key={z} value={z}>Zone {z}</option>)}
           </select>
+          
+          <select
+            value={status || ''}
+            onChange={(e) => { setStatus((e.target.value as SeatStatus) || undefined); setPage(1); }}
+            className="block w-32 rounded-lg border-0 py-2 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm font-medium"
+          >
+            <option value="">All Status</option>
+            <option value="Available">Available</option>
+            <option value="Occupied">Occupied</option>
+            <option value="Reserved">Reserved</option>
+            <option value="Maintenance">Maintenance</option>
+          </select>
         </form>
       </div>
 
@@ -82,7 +124,11 @@ export const Seats = () => {
         {isError ? (
           <ErrorState onRetry={() => refetch()} />
         ) : (
-          <SeatGrid seats={data?.data || []} isLoading={isLoading} />
+          <SeatGrid 
+            seats={data?.data || []} 
+            isLoading={isLoading} 
+            onSeatClick={handleSeatClick}
+          />
         )}
 
         {/* Pagination */}
@@ -98,6 +144,48 @@ export const Seats = () => {
           </div>
         )}
       </div>
+
+      <Dialog
+        isOpen={isReleaseModalOpen}
+        onClose={() => !releaseMutation.isPending && setIsReleaseModalOpen(false)}
+        title="Release Seat Allocation"
+        footer={
+          <>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => setIsReleaseModalOpen(false)}
+              disabled={releaseMutation.isPending}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn-primary bg-red-600 hover:bg-red-700"
+              onClick={handleRelease}
+              disabled={releaseMutation.isPending}
+            >
+              {releaseMutation.isPending ? 'Releasing...' : 'Release Seat'}
+            </button>
+          </>
+        }
+      >
+        <div className="flex flex-col items-center justify-center text-center p-4">
+          <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
+            <LogOut className="h-8 w-8 text-red-500" />
+          </div>
+          <p className="text-gray-900 font-medium mb-1">
+            Are you sure you want to release seat <strong className="text-brand-600">{selectedSeat?.seat_number}</strong>?
+          </p>
+          <p className="text-sm text-gray-500">
+            {selectedSeat?.occupant_name ? (
+              <>This will remove <strong>{selectedSeat.occupant_name}</strong> from this seat.</>
+            ) : (
+              "This action will make the seat available for new allocations immediately."
+            )}
+          </p>
+        </div>
+      </Dialog>
     </div>
   );
 };

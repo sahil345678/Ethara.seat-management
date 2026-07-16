@@ -50,6 +50,8 @@ export interface Seat {
   seat_number: string;
   status: SeatStatus;
   created_at: string;
+  occupant_name?: string;
+  project_name?: string;
 }
 
 export interface SeatAllocation {

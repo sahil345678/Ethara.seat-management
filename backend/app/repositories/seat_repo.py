@@ -4,7 +4,7 @@ import uuid
 from typing import Sequence
 
 from sqlalchemy import asc, desc, func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.enums import SeatStatus
 from app.models.seat import Seat
@@ -45,7 +45,10 @@ class SeatRepository:
         sort_desc: bool = False,
     ) -> tuple[Sequence[Seat], int]:
         """List seats with filtering, search, sorting, and pagination."""
-        stmt = select(Seat)
+        stmt = select(Seat).options(
+            selectinload(Seat.seat_allocations).selectinload("employee"),
+            selectinload(Seat.seat_allocations).selectinload("project")
+        )
 
         if floor is not None:
             stmt = stmt.where(Seat.floor == floor)

@@ -15,7 +15,8 @@ export const SeatGrid = ({ seats, onSeatClick, selectedSeatId, isLoading }: Seat
       case 'Available': 
         return clsx('bg-teal-50 border-teal-200 text-teal-700', isInteractive && 'hover:bg-teal-100 hover:border-teal-400');
       case 'Occupied': 
-        return 'bg-blue-50 border-blue-200 text-blue-700 opacity-70 cursor-not-allowed';
+        // We now make occupied interactive for release workflows
+        return clsx('bg-blue-50 border-blue-200 text-blue-700', isInteractive && 'hover:bg-blue-100 hover:border-blue-400 cursor-pointer');
       case 'Reserved': 
         return 'bg-purple-50 border-purple-200 text-purple-700 opacity-70 cursor-not-allowed';
       case 'Maintenance': 
@@ -27,9 +28,9 @@ export const SeatGrid = ({ seats, onSeatClick, selectedSeatId, isLoading }: Seat
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-4 animate-pulse">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 animate-pulse">
         {Array.from({ length: 30 }).map((_, i) => (
-          <div key={i} className="h-16 rounded-xl bg-gray-200"></div>
+          <div key={i} className="h-24 rounded-xl bg-gray-200"></div>
         ))}
       </div>
     );
@@ -45,11 +46,18 @@ export const SeatGrid = ({ seats, onSeatClick, selectedSeatId, isLoading }: Seat
   }
 
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
       {seats.map((seat) => {
-        const isInteractive = seat.status === 'Available' && !!onSeatClick;
+        // Now BOTH Available and Occupied can be interactive if onSeatClick is provided
+        const isInteractive = (seat.status === 'Available' || seat.status === 'Occupied') && !!onSeatClick;
         const isSelected = selectedSeatId === seat.id;
         
+        const tooltipText = `Seat: ${seat.seat_number}
+Status: ${seat.status}
+Floor: ${seat.floor} | Zone: ${seat.zone} | Bay: ${seat.bay}
+${seat.occupant_name ? `\nOccupant: ${seat.occupant_name}` : ''}
+${seat.project_name ? `Project: ${seat.project_name}` : ''}`;
+
         return (
           <button
             key={seat.id}
@@ -57,19 +65,29 @@ export const SeatGrid = ({ seats, onSeatClick, selectedSeatId, isLoading }: Seat
             onClick={() => isInteractive && onSeatClick && onSeatClick(seat)}
             disabled={!isInteractive && !!onSeatClick && !isSelected}
             className={clsx(
-              "relative flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl border-2 transition-all duration-200",
+              "relative flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 h-28 overflow-hidden",
               getStatusClasses(seat.status, isInteractive),
               isInteractive && !isSelected ? "shadow-sm" : "",
               isSelected ? "ring-4 ring-blue-500/50 border-blue-600 scale-105 shadow-md z-10 bg-blue-50" : "",
               !isInteractive && !isSelected && !!onSeatClick && "opacity-40 grayscale"
             )}
-            title={`Floor ${seat.floor}, Zone ${seat.zone}, Bay ${seat.bay}\nStatus: ${seat.status}`}
+            title={tooltipText}
           >
-            <Armchair className="h-5 w-5 mb-1 opacity-80" />
-            <span className="text-[11px] font-bold tracking-tight">{seat.seat_number}</span>
-            <span className="text-[9px] mt-0.5 uppercase font-semibold opacity-70 tracking-wider hidden sm:block">
+            <Armchair className={clsx("h-6 w-6 mb-1", seat.status === 'Occupied' ? "opacity-100 text-blue-600" : "opacity-80")} />
+            <span className="text-xs font-black tracking-tight mb-1">{seat.seat_number}</span>
+            <span className="text-[10px] uppercase font-bold opacity-70 tracking-wider">
               {seat.status}
             </span>
+            {seat.status === 'Occupied' && (
+              <div className="mt-1 flex flex-col items-center w-full px-1">
+                <span className="text-[10px] font-semibold text-blue-900 truncate w-full text-center">
+                  {seat.occupant_name || 'Assigned'}
+                </span>
+                <span className="text-[9px] font-medium text-blue-700/80 truncate w-full text-center">
+                  {seat.project_name || ''}
+                </span>
+              </div>
+            )}
           </button>
         );
       })}
