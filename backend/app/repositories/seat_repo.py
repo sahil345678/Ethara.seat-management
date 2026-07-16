@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.enums import SeatStatus
 from app.models.seat import Seat
+from app.models.seat_allocation import SeatAllocation
 
 
 class SeatRepository:
@@ -47,12 +48,6 @@ class SeatRepository:
     ) -> tuple[Sequence[Seat], int]:
         """List seats with filtering, search, sorting, and pagination."""
         stmt = select(Seat)
-        
-        if include_occupants:
-            stmt = stmt.options(
-                selectinload(Seat.seat_allocations).selectinload("employee"),
-                selectinload(Seat.seat_allocations).selectinload("project")
-            )
 
         if floor is not None:
             stmt = stmt.where(Seat.floor == floor)
@@ -80,6 +75,12 @@ class SeatRepository:
                 stmt = stmt.order_by(desc(sort_col))
             else:
                 stmt = stmt.order_by(asc(sort_col))
+
+        if include_occupants:
+            stmt = stmt.options(
+                selectinload(Seat.seat_allocations).selectinload(SeatAllocation.employee),
+                selectinload(Seat.seat_allocations).selectinload(SeatAllocation.project)
+            )
 
         stmt = stmt.offset(skip).limit(limit)
         items = self.db.execute(stmt).scalars().all()
